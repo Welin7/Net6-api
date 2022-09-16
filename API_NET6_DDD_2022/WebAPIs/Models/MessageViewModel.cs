@@ -15,6 +15,6 @@ namespace WebAPIs.Models
 
         public DateTime ChangeDate { get; set; }
 
-        public int UserId { get; set; }
+        public string UserId { get; set; }
     }
 }
