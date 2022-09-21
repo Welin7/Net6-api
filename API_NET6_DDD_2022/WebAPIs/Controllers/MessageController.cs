@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Domain.Interfaces;
+using Domain.Interfaces.InterfaceServices;
 using Entities.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -14,11 +15,13 @@ namespace WebAPIs.Controllers
     {
         private readonly IMapper _IMapper;
         private readonly IMessage _IMessage;
-  
-        public MessageController(IMapper IMapper, IMessage IMessage)
+        private readonly IServiceMessage _ServiceMessage;
+
+        public MessageController(IMapper IMapper, IMessage IMessage, IServiceMessage IServiceMessage)
         {
             this._IMapper = IMapper;
             this._IMessage = IMessage;
+            this._ServiceMessage = IServiceMessage;
         }
 
         [Authorize]
@@ -28,7 +31,7 @@ namespace WebAPIs.Controllers
         {
             message.UserId = await ReturnLoggedInUser();
             var messageMap = _IMapper.Map<Message>(message);
-            await _IMessage.Add(messageMap);
+            await _ServiceMessage.Add(messageMap);
             return messageMap.NotificationsList;
         }
 
@@ -68,6 +71,16 @@ namespace WebAPIs.Controllers
         public async Task<List<MessageViewModel>> List()
         {
             var messages = await _IMessage.GetAll();
+            var messageMap = _IMapper.Map<List<MessageViewModel>>(messages);
+            return messageMap;
+        }
+
+        [Authorize]
+        [Produces("application/json")]
+        [HttpPost("/api/ListMessageActive")]
+        public async Task<List<MessageViewModel>> ListMessageActive()
+        {
+            var messages = await _ServiceMessage.ListMessageActive();
             var messageMap = _IMapper.Map<List<MessageViewModel>>(messages);
             return messageMap;
         }
